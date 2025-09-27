@@ -6,6 +6,9 @@ declare class ContactController {
         id: string;
     }>, res: Response, next: NextFunction): Promise<void>;
     create(req: Request<{}, {}, IContactDto>, res: Response, next: NextFunction): Promise<void>;
+    update(req: Request<{
+        id: string;
+    }, {}, IContactDto>, res: Response, next: NextFunction): Promise<void>;
 }
 declare const _default: ContactController;
 export default _default;

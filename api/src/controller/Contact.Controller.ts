@@ -19,6 +19,12 @@ class ContactController {
         res.status(201).json(createdContact);
         return
     }
+
+    async update(req: Request<{id: string}, {}, IContactDto>, res: Response, next: NextFunction) {
+        const updatedContact = await ContactService.update(req.params.id, req.body);
+        res.status(200).json(updatedContact);
+        return
+    }
 }
 
 export default new ContactController;

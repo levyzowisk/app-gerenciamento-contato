@@ -26,6 +26,14 @@ class ContactRepository {
             }
         });
     }
+    async update(id, contact) {
+        return await (await this.prisma.connection()).contact.update({
+            where: {
+                id
+            },
+            data: contact
+        });
+    }
 }
 export default new ContactRepository;
 //# sourceMappingURL=Contact.Repository.js.map

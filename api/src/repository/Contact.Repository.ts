@@ -16,7 +16,7 @@ class ContactRepository {
         
     }
 
-    async insert(contact: IContactDto) {
+    async insert(contact: IContactDto): Promise<IContact> {
         return await (await this.prisma.connection()).contact.create({
             data: contact
         });
@@ -27,6 +27,16 @@ class ContactRepository {
             where: {
                 phone
             }
+        })
+    }
+
+    async update(id: string, contact: IContactDto): Promise<IContact> {
+        return await (await this.prisma.connection()).contact.update({
+            where: {
+                id
+            },
+            data: contact
+
         })
     }
      

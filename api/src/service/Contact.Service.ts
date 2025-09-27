@@ -20,5 +20,9 @@ export class ContactService {
         }
         return await ContactRepository.insert(data);
     }
+
+    static async update(id: string, data: IContactDto): Promise<IContact> {
+        return await ContactRepository.update(id, data);
+    }
 }
 

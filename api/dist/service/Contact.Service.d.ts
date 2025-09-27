@@ -4,4 +4,5 @@ export declare class ContactService {
     static remove(id: string): Promise<void>;
     private static findByPhone;
     static create(data: IContactDto): Promise<IContact>;
+    static update(id: string, data: IContactDto): Promise<IContact>;
 }

@@ -16,5 +16,8 @@ export class ContactService {
         }
         return await ContactRepository.insert(data);
     }
+    static async update(id, data) {
+        return await ContactRepository.update(id, data);
+    }
 }
 //# sourceMappingURL=Contact.Service.js.map
