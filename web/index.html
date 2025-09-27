@@ -47,12 +47,13 @@
               </div>
             </header>
             <section class="flex flex-col px-8 py-5 mt-5 rounded-md gap-4 bg-gray-100/50 shadow-xs">
-              <button
-                class="bg-blue-700 text-white rounded-md p-1 self-end hover:cursor-pointer"
-                @click="toggleVisibleModalCreate"
-              >
-                Adicionar Contato
-              </button>
+            <base-button
+            class="bg-blue-600 text-white rounded-md py-1 px-2 self-end hover:cursor-pointer hover:bg-blue-800"
+            :disabled="false"
+            @click="toggleVisibleModalCreate"
+            >
+            Adicionar Contato
+            </base-button>
 
               <contact-table
                     :contacts="contactsAPi"
@@ -71,7 +72,70 @@
       const app = createApp({
         setup() {},
       });
+      
+      app.component("BaseInput", {
+            props: {
+              inputId: String,
+              req: String,
+              max: String,
+              modelValue: String,
+              label: String,
+              placeholder: String,
+              error: String,
+              type: { type: String, default: "text" },
+            },
+            emits: ["update:modelValue", "input"],
+            setup(props, { emit, expose }) {
+              const inputEl = ref(null);
 
+              function handleInput(event) {
+                let value = event.target.value;
+
+                if (props.inputId === "name") {
+                  value = value.replace(/[^A-Za-zÀ-ÖØ-öø-ÿ\s'-]/g, "");
+                  event.target.value = value; 
+                }
+
+                emit("update:modelValue", value);
+                emit("input", value);
+              }
+
+              expose({ inputEl });
+              return { inputEl, handleInput };
+            },
+            template: `
+              <div class="mb-4">
+                <label :for="inputId" class="block mb-1 font-medium text-gray-700">{{ label }}</label>
+                <input
+                  ref="inputEl"
+                  :id="inputId"
+                  :type="type"
+                  class="border p-2 w-full rounded focus:outline-none focus:ring-1 focus:ring-blue-700 focus:border-blue-700"
+                  :placeholder="placeholder"
+                  :required="req"
+                  :value="modelValue"
+                  :maxlength="max"
+                  @input="handleInput"
+                />
+                <p v-if="error" class="text-orange-700 text-sm mt-1">{{ error }}</p>
+              </div>
+            `,
+          });
+      app.component("BaseButton", {
+        props: {
+              type: { type: String, default: "submit" },
+              disabledClasses: { type: String, default: "" }, 
+            },
+        template: `
+              <button
+                :type="type"
+                v-bind="$attrs"
+                :class="[ $attrs.class, $attrs.disabled ? disabledClasses : '' ]"
+              >
+                <slot />
+              </button>
+            `,
+          });
       app.component("ContactTable", {
         props: {
           contacts: { type: Array, default: () => [] },
