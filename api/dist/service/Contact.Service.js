@@ -1,4 +1,5 @@
 import ContactRepository from "../repository/Contact.Repository.js";
+import BaseError from "../utils/BaseError.utils.js";
 export class ContactService {
     static async find() {
         return await ContactRepository.find();
@@ -11,7 +12,7 @@ export class ContactService {
     }
     static async create(data) {
         if (await this.findByPhone(data.phone)) {
-            throw new Error('Contato já existente');
+            throw new BaseError(409, 'Contato já existente');
         }
         return await ContactRepository.insert(data);
     }
