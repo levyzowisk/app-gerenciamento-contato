@@ -5,7 +5,14 @@ class ContactRepository {
         this.prisma = prisma;
     }
     async find() {
-        return (await this.prisma.connection()).contact.findMany();
+        return await (await this.prisma.connection()).contact.findMany();
+    }
+    async remove(id) {
+        await (await this.prisma.connection()).contact.delete({
+            where: {
+                id
+            }
+        });
     }
 }
 export default new ContactRepository;
