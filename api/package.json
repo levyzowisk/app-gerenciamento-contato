@@ -6,7 +6,8 @@
     "build": "tsc",
     "watch": "tsc -w",
     "dev": "concurrently \"nodemon ./dist/server.js\" \"npx tsc -w\"",
-    "start": "node ./dist/server.js"
+    "prisma:deploy": "prisma migrate deploy",
+    "start":"npm run prisma:deploy && node ./dist/server.js"
   },
   "keywords": [],
   "author": "",
