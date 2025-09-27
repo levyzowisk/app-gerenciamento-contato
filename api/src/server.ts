@@ -2,7 +2,7 @@ import express from "express";
 import dotenv from 'dotenv';
 import route from "./routes/contact.Route.js";
 import cors from 'cors';
-import handleError from "./middleware/contact.middleware.js";
+import handleError from "./middleware/error.js";
 dotenv.config();
 
 const app = express();

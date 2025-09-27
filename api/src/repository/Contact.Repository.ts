@@ -1,5 +1,5 @@
 import { Prisma } from "../config/database.js";
-import { IContact } from "../interface/contact.interface.js";
+import { IContact, IContactDto } from "../interface/contact.interface.js";
 class ContactRepository {
     constructor (private readonly prisma =  new Prisma) {}
 
@@ -14,6 +14,20 @@ class ContactRepository {
             }
         })
         
+    }
+
+    async insert(contact: IContactDto) {
+        return await (await this.prisma.connection()).contact.create({
+            data: contact
+        });
+    }
+
+    async findByPhone(phone: string): Promise<IContact | null> {
+        return await (await this.prisma.connection()).contact.findUnique({
+            where: {
+                phone
+            }
+        })
     }
      
 }

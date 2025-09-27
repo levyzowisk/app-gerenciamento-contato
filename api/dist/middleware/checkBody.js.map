@@ -1,0 +1,1 @@
+{"version":3,"file":"checkBody.js","sourceRoot":"","sources":["../../src/middleware/checkBody.ts"],"names":[],"mappings":"AAEA,KAAK,UAAU,SAAS,CAAC,GAAY,EAAE,GAAa,EAAE,IAAkB;IACpE,IAAG,CAAC,GAAG,CAAC,IAAI,EAAE,CAAC;QACX,OAAO,GAAG,CAAC,MAAM,CAAC,GAAG,CAAC,CAAC,IAAI,CAAC,mBAAmB,CAAC,CAAC;IACrD,CAAC;IACD,IAAI,EAAE,CAAA;AACV,CAAC;AAED,eAAe,SAAS,CAAC"}

@@ -14,6 +14,18 @@ class ContactRepository {
             }
         });
     }
+    async insert(contact) {
+        return await (await this.prisma.connection()).contact.create({
+            data: contact
+        });
+    }
+    async findByPhone(phone) {
+        return await (await this.prisma.connection()).contact.findUnique({
+            where: {
+                phone
+            }
+        });
+    }
 }
 export default new ContactRepository;
 //# sourceMappingURL=Contact.Repository.js.map

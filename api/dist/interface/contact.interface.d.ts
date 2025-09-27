@@ -3,3 +3,5 @@ export interface IContact {
     name: string;
     phone: string;
 }
+export interface IContactDto extends Omit<IContact, 'id'> {
+}
