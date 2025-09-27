@@ -7,7 +7,6 @@ class ContactController {
     }
 
     async remove(req: Request<{id: string}>, res: Response, next: NextFunction) {
-        
         await ContactService.remove(req.params.id);
         res.status(204).json();
     }

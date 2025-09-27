@@ -2,12 +2,14 @@ import express from "express";
 import dotenv from 'dotenv';
 import route from "./routes/contact.Route.js";
 import cors from 'cors';
+import handleError from "./middleware/contact.middleware.js";
 dotenv.config();
 const app = express();
+const port = process.env.SERVER_PORT || 3100;
 app.use(express.json());
 app.use(cors());
 app.use("/contact", route);
-const port = process.env.SERVER_PORT || 3100;
+app.use(handleError);
 app.listen(port, () => {
     console.log('Servidor Online!');
 });
