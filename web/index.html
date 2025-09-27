@@ -1,40 +1,170 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Gerenciador de Contatos</title>
 
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <script src="https://cdn.jsdelivr.net/npm/cleave.js@1/dist/cleave.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/cleave.js@1/dist/addons/cleave-phone.br.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastify-js/1.6.1/toastify.min.css">
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/toastify-js/1.6.1/toastify.min.css"
+    />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/toastify-js/1.6.1/toastify.min.js"></script>
-
-</head>
-<body>
+  </head>
+  <body>
     <script type="importmap">
-        {
+      {
         "imports": {
-            "vue": "https://unpkg.com/vue@3/dist/vue.esm-browser.js"
+          "vue": "https://unpkg.com/vue@3/dist/vue.esm-browser.js"
         }
-        }
+      }
     </script>
-    
 
     <div id="app">
-        <h1>Oi som!</h1>
+        <div class="py10 px-25">
+            <header class="flex justify-between px-10 pt-10">
+              <div class="flex gap-4">
+                <figure class="bg-blue-500 p-1 rounded-md">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke-width="1.5"
+                    stroke="currentColor"
+                    class="size-8 text-white"
+                  >
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      d="M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0 4.121-.952 4.125 4.125 0 0 0-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 0 1 8.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0 1 11.964-3.07M12 6.375a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0Zm8.25 2.25a2.625 2.625 0 1 1-5.25 0 2.625 2.625 0 0 1 5.25 0Z"
+                    />
+                  </svg>
+                </figure>
+                <h1 class="font-title font-semibold text-2xl">Lista de Contatos</h1>
+              </div>
+            </header>
+            <section class="flex flex-col px-8 py-5 mt-5 rounded-md gap-4 bg-gray-100/50 shadow-xs">
+              <button
+                class="bg-blue-700 text-white rounded-md p-1 self-end hover:cursor-pointer"
+                @click="toggleVisibleModalCreate"
+              >
+                Adicionar Contato
+              </button>
+
+              <contact-table
+                    :contacts="contactsAPi"
+                    :loading="loading"
+                    :error="error"
+                    @edit="prepareUpdate"
+                    @delete="prepareDelete"
+               />
+            </section>
+
+        </div>
     </div>
 
     <script type="module">
-        import {createApp} from "vue";
-        const app = createApp({
-            setup() {
+      import { createApp } from "vue";
+      const app = createApp({
+        setup() {},
+      });
 
-            }
-        })
+      app.component("ContactTable", {
+        props: {
+          contacts: { type: Array, default: () => [] },
+          loading: Boolean,
+          error: Boolean,
+        },
+        emits: ["edit", "delete"],
+        setup(props, { emit }) {
+          function formatPhone(phone) {
+            const cleaned = phone.replace(/\D/g, "");
+            const match = cleaned.match(/^(\d{2})(\d{5})(\d{4})$/);
+            return match ? `(${match[1]}) ${match[2]}-${match[3]}` : phone;
+          }
+          return { emit, formatPhone };
+        },
+        template: `
+              <div class="rounded-lg overflow-hidden border border-gray-300">
+                <table class="table-auto min-w-full">
+                  <thead class="bg-gray-200">
+                    <tr>
+                      <th class="text-start p-2">ID</th>
+                      <th class="text-start p-2">Nome</th>
+                      <th class="text-start p-2">Telefone</th>
+                      <th class="text-start p-2">Ações</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr v-if="loading">
+                      <td colspan="4" class="p-4 text-center text-gray-500 italic">
+                        Carregando contatos...
+                      </td>
+                    </tr>
 
-        app.mount("#app");
+                    <tr v-else-if="error">
+                      <td colspan="4" class="p-4 text-center text-red-500 font-medium bg-red-50">
+                        Ocorreu um erro ao carregar os contatos
+                      </td>
+                    </tr>
+
+                    <tr v-else-if="contacts.length === 0">
+                      <td colspan="4" class="p-4 text-center text-gray-400 italic">
+                        Nenhum contato cadastrado.
+                      </td>
+                    </tr>
+
+                    <tr v-else v-for="item in contacts" :key="item.id"
+                    :class="{ 'bg-blue-100': item.phone.startsWith('11') }"
+                    >
+                      <td class="text-start p-3 text-gray-500">{{ item.id.slice(0,4) }}</td>
+                      <td class="text-start p-3 font-medium">{{ item.name }}</td>
+                      <td class="text-start p-3 text-gray-500">{{ formatPhone(item.phone) }}</td>
+                      <td class="p-3 flex gap-2">
+                        <base-button color="none" @click="emit('edit', item)">
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            viewBox="0 0 24 24"
+                            fill="currentColor"
+                            class="size-6 text-orange-500 hover:text-orange-700 duration-200 ease-in-out hover:scale-110"
+                          >
+                            <path
+                              d="M21.731 2.269a2.625 2.625 0 0 0-3.712 0l-1.157 1.157 3.712 3.712 1.157-1.157a2.625 2.625 0 0 0 0-3.712ZM19.513 8.199l-3.712-3.712-8.4 8.4a5.25 5.25 0 0 0-1.32 2.214l-.8 2.685a.75.75 0 0 0 .933.933l2.685-.8a5.25 5.25 0 0 0 2.214-1.32l8.4-8.4Z"
+                            />
+                            <path
+                              d="M5.25 5.25a3 3 0 0 0-3 3v10.5a3 3 0 0 0 3 3h10.5a3 3 0 0 0 3-3V13.5a.75.75 0 0 0-1.5 0v5.25a1.5 1.5 0 0 1-1.5 1.5H5.25a1.5 1.5 0 0 1-1.5-1.5V8.25a1.5 1.5 0 0 1 1.5-1.5h5.25a.75.75 0 0 0 0-1.5H5.25Z"
+                            />
+                          </svg>
+                        </base-button>
+
+                        <base-button color="none" @click="emit('delete', item)">
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            viewBox="0 0 24 24"
+                            fill="currentColor"
+                            class="size-6 hover:cursor-pointer text-red-500 hover:text-red-700 duration-200 ease-in-out hover:scale-110"
+                          >
+                            <path
+                              d="M3.375 3C2.339 3 1.5 3.84 1.5 4.875v.75c0 1.036.84 1.875 1.875 1.875h17.25c1.035 0 1.875-.84 1.875-1.875v-.75C22.5 3.839 21.66 3 20.625 3H3.375Z"
+                            />
+                            <path
+                              fill-rule="evenodd"
+                              d="m3.087 9 .54 9.176A3 3 0 0 0 6.62 21h10.757a3 3 0 0 0 2.995-2.824L20.913 9H3.087Zm6.133 2.845a.75.75 0 0 1 1.06 0l1.72 1.72 1.72-1.72a.75.75 0 1 1 1.06 1.06l-1.72 1.72 1.72 1.72a.75.75 0 1 1-1.06 1.06L12 15.685l-1.72 1.72a.75.75 0 1 1-1.06-1.06l1.72-1.72-1.72-1.72a.75.75 0 0 1 0-1.06Z"
+                              clip-rule="evenodd"
+                            />
+                          </svg>
+                        </base-button>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            `,
+      });
+      app.mount("#app");
     </script>
-</body>
+  </body>
 </html>
