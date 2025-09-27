@@ -109,6 +109,52 @@
                 </div>
             </form>
             </div>
+            
+            <div
+              v-if="showModalUpdate"
+              class="fixed inset-0 bg-black/50 flex justify-center items-center opacity-0"
+              :class="{ 'opacity-100 transition-opacity duration-200': showModalUpdate }"
+            >
+              <form class="bg-white rounded-lg p-6 w-100 relative" @submit.prevent="updateContact">
+                <h2 class="text-xl font-semibold text-black mb-4">Editar Contato</h2>
+
+                <base-input
+                  input-id="name"
+                  label="Nome"
+                  placeholder="Digite seu nome"
+                  v-model="contactName"
+                  req="required"
+                  :error="nameError"
+                >
+                </base-input>
+
+                <base-input
+                  input-id="phone"
+                  label="Telefone"
+                  placeholder="(85) 98891-9231"
+                  v-model="contactPhone"
+                  :error="phoneError"
+                  type="tel"
+                  ref="inputPhoneUpdate"
+                  max="15"
+                  req="required"
+                  
+                >
+                </base-input>
+
+                <div class="flex justify-end gap-2 mt-4">
+                  <base-button class="bg-gray-300 px-4 py-2 rounded hover:bg-gray-400" @click="toggleVisibleModalUpdate">Cancelar</base-button>
+              
+                    <base-button
+                    :disabled="!isFormValid"
+                    class="bg-blue-700 text-white hover:bg-blue-800 px-4 py-2 rounded"
+                    disabled-classes="bg-gray-400 text-gray-200 cursor-not-allowed hover:bg-gray-400"
+                  >
+                    Atualizar
+                  </base-button>
+                </div>
+              </form>
+            </div>
 
             <div
               v-if="showModalDelete"
@@ -136,16 +182,21 @@
     </div>
 
     <script type="module">
-      import { createApp, ref, computed, onMounted } from "vue";
+      import { createApp, ref, computed, onMounted, watch, nextTick } from "vue";
       const app = createApp({
         setup() {
             const contactsAPi = ref([])
+
             const showModalCreate = ref(false);
             const showModalDelete = ref(false);
+            const showModalUpdate = ref(false);
+
             const loading = ref(true);
             const error =  ref(false)
 
             const inputPhone = ref(null);
+            const inputPhoneUpdate = ref(null)
+
 
             const contactName = ref('');
             const contactPhone = ref('');
@@ -154,9 +205,14 @@
             const phoneError = ref("");
 
             const deletingItem = ref(null);
+            let idUpdate = ''
+
 
             const baseURL =  "http://localhost:3000/contact"
 
+            function sanitazePhone (phone) {
+                return phone.value.replace(/\D/g, "")
+              }
             const fetchContacts = async () => {
                 try {
                   const res = await fetch(baseURL);
@@ -180,6 +236,7 @@
             onMounted(() => {
                 fetchContacts()
             })
+
             function showSuccessToast(msg, color) {
                 Toastify({
                     text: msg,
@@ -200,6 +257,20 @@
                 }
               }
 
+            function toggleVisibleModalDelete() {
+                showModalDelete.value = !showModalDelete.value;
+              }
+            
+            function toggleVisibleModalUpdate() {
+                showModalUpdate.value = !showModalUpdate.value;
+                if(!showModalUpdate.value) {
+                    contactName.value = ''
+                    contactPhone.value = ''
+                    nameError.value = ''
+                    phoneError.value = ''
+                }
+              }
+                
             const isFormValid = computed(() => {
                 const words = contactName.value
                   .trim()
@@ -250,10 +321,6 @@
                 
               }
             
-            function toggleVisibleModalDelete() {
-                showModalDelete.value = !showModalDelete.value;
-              }
-
             function prepareDelete(item) {
                 toggleVisibleModalDelete();
                 deletingItem.value = item
@@ -266,11 +333,62 @@
                 showSuccessToast("Contato deletado com sucesso!", "green");  
             }
 
+            function prepareUpdate(item) {
+                console.log(item);
+                
+                toggleVisibleModalUpdate()
+                contactPhone.value = item.phone
+                contactName.value = item.name
+                idUpdate = item.id
+
+              }
+              
+            async function updateContact() {
+                contactPhone.value = sanitazePhone(contactPhone);
+
+                const res = await fetch(`${baseURL}/${idUpdate}`,{
+                  method: 'PATCH',
+                  headers: {
+                    'Content-Type': 'application/json'
+                  },
+                    body: JSON.stringify({
+                    name: contactName.value,
+                    phone: contactPhone.value
+                  })
+                }
+                );
+                  if (res.status === 200) {
+                    toggleVisibleModalUpdate();
+                    await fetchContacts()
+                    showSuccessToast("Contato atualizado com Sucesso!", "green") 
+                  } else if (res.status === 409) {
+                   showSuccessToast("Contato já existente", "orange");  
+                   toggleVisibleModalUpdate()
+                  } else {
+                   showSuccessToast("Um erro ocorreu", "red");  
+
+                  }
+                
+              }
+            
+            function maskPhone(el) {
+                new Cleave(el.inputEl, {
+                  delimiters: ['(', ') ', '-'],
+                  blocks: [0, 2, 5, 4],
+                  numericOnly: true
+                })
+              }
+
+            
+            watch(showModalCreate, async o => o && (await nextTick(), maskPhone(inputPhone.value)))
+            watch(showModalUpdate, async o => o && (await nextTick(), maskPhone(inputPhoneUpdate.value)))
+
             return {
                 toggleVisibleModalCreate, showModalCreate, contactName,
                 contactPhone, nameError, phoneError, isFormValid,
                 inputPhone, deletingItem, showModalDelete,
-                toggleVisibleModalDelete
+                toggleVisibleModalDelete, contactsAPi, loading, error,
+                prepareUpdate, prepareDelete
                 
             }
         }
