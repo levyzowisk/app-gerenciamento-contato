@@ -1,556 +1,562 @@
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Gerenciador de Contatos</title>
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Gerenciador de Contatos</title>
 
-    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
-    <script src="https://cdn.jsdelivr.net/npm/cleave.js@1/dist/cleave.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/cleave.js@1/dist/addons/cleave-phone.br.js"></script>
-    <link
-      rel="stylesheet"
-      href="https://cdnjs.cloudflare.com/ajax/libs/toastify-js/1.6.1/toastify.min.css"
-    />
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastify-js/1.6.1/toastify.min.js"></script>
-  </head>
-  <body>
-    <script type="importmap">
-      {
-        "imports": {
-          "vue": "https://unpkg.com/vue@3/dist/vue.esm-browser.js"
+        <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+        <script src="https://cdn.jsdelivr.net/npm/cleave.js@1/dist/cleave.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/cleave.js@1/dist/addons/cleave-phone.br.js"></script>
+        <link
+        rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/toastify-js/1.6.1/toastify.min.css"
+        />
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/toastify-js/1.6.1/toastify.min.js"></script>
+    </head>
+    <body>
+        <script type="importmap">
+        {
+            "imports": {
+            "vue": "https://unpkg.com/vue@3/dist/vue.esm-browser.js"
+            }
         }
-      }
-    </script>
+        </script>
 
-    <div id="app">
-        <div class="py10 px-25">
-            <header class="flex justify-between px-10 pt-10">
-              <div class="flex gap-4">
-                <figure class="bg-blue-500 p-1 rounded-md">
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke-width="1.5"
-                    stroke="currentColor"
-                    class="size-8 text-white"
-                  >
-                    <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      d="M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0 4.121-.952 4.125 4.125 0 0 0-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 0 1 8.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0 1 11.964-3.07M12 6.375a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0Zm8.25 2.25a2.625 2.625 0 1 1-5.25 0 2.625 2.625 0 0 1 5.25 0Z"
-                    />
-                  </svg>
-                </figure>
-                <h1 class="font-title font-semibold text-2xl">Lista de Contatos</h1>
-              </div>
-            </header>
-
-            <section class="flex flex-col px-8 py-5 mt-5 rounded-md gap-4 bg-gray-100/50 shadow-xs">
-            <base-button
-            class="bg-blue-600 text-white rounded-md py-1 px-2 self-end hover:cursor-pointer hover:bg-blue-800"
-            :disabled="false"
-            @click="toggleVisibleModalCreate"
-            >
-            Adicionar Contato
-            </base-button>
-
-              <contact-table
-                    :contacts="contactsAPi"
-                    :loading="loading"
-                    :error="error"
-                    @edit="prepareUpdate"
-                    @delete="prepareDelete"
-               />
-            </section>
-
-            <div
-              v-if="showModalCreate"
-              class="fixed inset-0 bg-black/50 flex justify-center items-center opacity-0"
-              :class="{ 'opacity-100 transition-opacity duration-200': showModalCreate }"
-            >
-            <form class="bg-white rounded-lg p-6 w-100 relative" @submit.prevent="createContact">
-                <h2 class="text-xl font-semibold text-black mb-4">Novo Contato</h2>
-                <base-input
-                  input-id="name"
-                  label="Nome"
-                  placeholder="Digite seu nome"
-                  v-model="contactName"
-                  req="required"
-                  :error="nameError"
-                >
-                </base-input>
-
-                <base-input
-                  input-id="phone"
-                  ref="inputPhone"
-                  label="Telefone"
-                  placeholder="(85) 98891-9231"
-                  :error="phoneError"
-                  v-model="contactPhone"
-                  type="tel"
-                  max="15"
-                  req="required"
-                >
-                </base-input>
-
-                <div class="flex justify-end gap-2 mt-4">
-                  <base-button class="bg-gray-300 px-4 py-2 rounded hover:bg-gray-400" @click="toggleVisibleModalCreate">Cancelar</base-button>
-
-                  <base-button
-                    :disabled="!isFormValid"
-                    class="bg-blue-700 text-white hover:bg-blue-800 px-4 py-2 rounded"
-                    disabled-classes="bg-gray-400 text-gray-200 cursor-not-allowed hover:bg-gray-400"
-                  >
-                    Salvar
-                  </base-button>
-
+        <div id="app">
+            <div class="py10 px-25">
+                <header class="flex justify-between px-10 pt-10">
+                <div class="flex gap-4">
+                    <figure class="bg-blue-500 p-1 rounded-md">
+                    <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke-width="1.5"
+                        stroke="currentColor"
+                        class="size-8 text-white"
+                    >
+                        <path
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        d="M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0 4.121-.952 4.125 4.125 0 0 0-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 0 1 8.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0 1 11.964-3.07M12 6.375a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0Zm8.25 2.25a2.625 2.625 0 1 1-5.25 0 2.625 2.625 0 0 1 5.25 0Z"
+                        />
+                    </svg>
+                    </figure>
+                    <h1 class="font-title font-semibold text-2xl">Lista de Contatos</h1>
                 </div>
-            </form>
-            </div>
-            
-            <div
-              v-if="showModalUpdate"
-              class="fixed inset-0 bg-black/50 flex justify-center items-center opacity-0"
-              :class="{ 'opacity-100 transition-opacity duration-200': showModalUpdate }"
-            >
-              <form class="bg-white rounded-lg p-6 w-100 relative" @submit.prevent="updateContact">
-                <h2 class="text-xl font-semibold text-black mb-4">Editar Contato</h2>
+                </header>
 
-                <base-input
-                  input-id="name"
-                  label="Nome"
-                  placeholder="Digite seu nome"
-                  v-model="contactName"
-                  req="required"
-                  :error="nameError"
+                <section class="flex flex-col px-8 py-5 mt-5 rounded-md gap-4 bg-gray-100/50 shadow-xs">
+                <base-button
+                class="bg-blue-600 text-white rounded-md py-1 px-2 self-end hover:cursor-pointer hover:bg-blue-800"
+                :disabled="false"
+                @click="toggleVisibleModalCreate"
                 >
-                </base-input>
+                Adicionar Contato
+                </base-button>
 
-                <base-input
-                  input-id="phone"
-                  label="Telefone"
-                  placeholder="(85) 98891-9231"
-                  v-model="contactPhone"
-                  :error="phoneError"
-                  type="tel"
-                  ref="inputPhoneUpdate"
-                  max="15"
-                  req="required"
-                  
+                <contact-table
+                        :contacts="contactsAPi"
+                        :loading="loading"
+                        :error="error"
+                        @edit="prepareUpdate"
+                        @delete="prepareDelete"
+                />
+                </section>
+
+                <div
+                v-if="showModalCreate"
+                class="fixed inset-0 bg-black/50 flex justify-center items-center opacity-0"
+                :class="{ 'opacity-100 transition-opacity duration-200': showModalCreate }"
                 >
-                </base-input>
+                <form class="bg-white rounded-lg p-6 w-100 relative" @submit.prevent="createContact">
+                    <h2 class="text-xl font-semibold text-black mb-4">Novo Contato</h2>
+                    <base-input
+                    input-id="name"
+                    label="Nome"
+                    placeholder="Digite seu nome"
+                    v-model="contactName"
+                    req="required"
+                    :error="nameError"
+                    >
+                    </base-input>
 
-                <div class="flex justify-end gap-2 mt-4">
-                  <base-button class="bg-gray-300 px-4 py-2 rounded hover:bg-gray-400" @click="toggleVisibleModalUpdate">Cancelar</base-button>
-              
+                    <base-input
+                    input-id="phone"
+                    ref="inputPhone"
+                    label="Telefone"
+                    placeholder="(85) 98891-9231"
+                    :error="phoneError"
+                    v-model="contactPhone"
+                    type="tel"
+                    max="15"
+                    req="required"
+                    >
+                    </base-input>
+
+                    <div class="flex justify-end gap-2 mt-4">
+                    <base-button class="bg-gray-300 px-4 py-2 rounded hover:bg-gray-400" @click="toggleVisibleModalCreate">Cancelar</base-button>
+
                     <base-button
-                    :disabled="!isFormValid"
-                    class="bg-blue-700 text-white hover:bg-blue-800 px-4 py-2 rounded"
-                    disabled-classes="bg-gray-400 text-gray-200 cursor-not-allowed hover:bg-gray-400"
-                  >
-                    Atualizar
-                  </base-button>
+                        :disabled="!isFormValid"
+                        class="bg-blue-700 text-white hover:bg-blue-800 px-4 py-2 rounded"
+                        disabled-classes="bg-gray-400 text-gray-200 cursor-not-allowed hover:bg-gray-400"
+                    >
+                        Salvar
+                    </base-button>
+
+                    </div>
+                </form>
                 </div>
-              </form>
-            </div>
 
-            <div
-              v-if="showModalDelete"
-              class="fixed inset-0 bg-black/50 flex justify-center items-center opacity-0"
-              :class="{ 'opacity-100 transition-opacity duration-200': showModalDelete }"
-            >
-              <div class="bg-white p-6 rounded-lg w-96 relative">
-                <h2 class="text-xl font-semibold mb-2">Confirmar exclusão</h2>
-                <p>
-                  Tem certeza que deseja excluir o contato  
-                  <strong>{{ deletingItem.name }}</strong>? Esta ação não pode ser
-                  desfeita.
-                </p>
+                <div
+                v-if="showModalUpdate"
+                class="fixed inset-0 bg-black/50 flex justify-center items-center opacity-0"
+                :class="{ 'opacity-100 transition-opacity duration-200': showModalUpdate }"
+                >
+                <form class="bg-white rounded-lg p-6 w-100 relative" @submit.prevent="updateContact">
+                    <h2 class="text-xl font-semibold text-black mb-4">Editar Contato</h2>
 
-                <div class="flex justify-end gap-2 mt-4">
-                  <base-button class="bg-gray-300 px-4 py-2 rounded hover:bg-gray-400" @click="toggleVisibleModalDelete">Cancelar</base-button>
-                  
-                  <base-button type="button" class="bg-red-700 text-white  hover:bg-red-800 px-4 py-2 rounded"  @click="deleteContact">Salvar</base-button>
+                    <base-input
+                    input-id="name"
+                    label="Nome"
+                    placeholder="Digite seu nome"
+                    v-model="contactName"
+                    req="required"
+                    :error="nameError"
+                    >
+                    </base-input>
+
+                    <base-input
+                    input-id="phone"
+                    label="Telefone"
+                    placeholder="(85) 98891-9231"
+                    v-model="contactPhone"
+                    :error="phoneError"
+                    type="tel"
+                    ref="inputPhoneUpdate"
+                    max="15"
+                    req="required"
+                    
+                    >
+                    </base-input>
+
+                    <div class="flex justify-end gap-2 mt-4">
+                    <base-button class="bg-gray-300 px-4 py-2 rounded hover:bg-gray-400" @click="toggleVisibleModalUpdate">Cancelar</base-button>
+                
+                        <base-button
+                        :disabled="!isFormValid"
+                        class="bg-blue-700 text-white hover:bg-blue-800 px-4 py-2 rounded"
+                        disabled-classes="bg-gray-400 text-gray-200 cursor-not-allowed hover:bg-gray-400"
+                    >
+                        Atualizar
+                    </base-button>
+                    </div>
+                </form>
                 </div>
-              </div>
+
+                <div
+                v-if="showModalDelete"
+                class="fixed inset-0 bg-black/50 flex justify-center items-center opacity-0"
+                :class="{ 'opacity-100 transition-opacity duration-200': showModalDelete }"
+                >
+                <div class="bg-white p-6 rounded-lg w-96 relative">
+                    <h2 class="text-xl font-semibold mb-2">Confirmar exclusão</h2>
+                    <p>
+                    Tem certeza que deseja excluir o contato  
+                    <strong>{{ deletingItem.name }}</strong>? Esta ação não pode ser
+                    desfeita.
+                    </p>
+
+                    <div class="flex justify-end gap-2 mt-4">
+                    <base-button class="bg-gray-300 px-4 py-2 rounded hover:bg-gray-400" @click="toggleVisibleModalDelete">Cancelar</base-button>
+                    
+                    <base-button type="button" class="bg-red-700 text-white  hover:bg-red-800 px-4 py-2 rounded"  @click="deleteContact">Excluir</base-button>
+                    </div>
+                </div>
+                </div>
+
+
             </div>
-
-
         </div>
-    </div>
 
-    <script type="module">
-      import { createApp, ref, computed, onMounted, watch, nextTick } from "vue";
-      const app = createApp({
-        setup() {
-            const contactsAPi = ref([])
+        <script type="module">
+        import { createApp, ref, computed, onMounted, watch, nextTick } from "vue";
+        const app = createApp({
+            setup() {
+                const contactsAPi = ref([])
 
-            const showModalCreate = ref(false);
-            const showModalDelete = ref(false);
-            const showModalUpdate = ref(false);
+                const showModalCreate = ref(false);
+                const showModalDelete = ref(false);
+                const showModalUpdate = ref(false);
 
-            const loading = ref(true);
-            const error =  ref(false)
+                const loading = ref(true);
+                const error =  ref(false)
 
-            const inputPhone = ref(null);
-            const inputPhoneUpdate = ref(null)
-
-
-            const contactName = ref('');
-            const contactPhone = ref('');
-                            
-            const nameError = ref("");
-            const phoneError = ref("");
-
-            const deletingItem = ref(null);
-            let idUpdate = ''
+                const inputPhone = ref(null);
+                const inputPhoneUpdate = ref(null)
 
 
-            const baseURL =  "http://localhost:3000/contact"
+                const contactName = ref('');
+                const contactPhone = ref('');
+                                
+                const nameError = ref("");
+                const phoneError = ref("");
 
-            function sanitazePhone (phone) {
-                return phone.value.replace(/\D/g, "")
-              }
-            const fetchContacts = async () => {
-                try {
-                  const res = await fetch(baseURL);
-                  const data = await res.json();
-                  console.log(data);
-                  
-                  contactsAPi.value = data.map(contact => ({
-                  id: contact.id,
-                  name: contact.name,
-                  phone: contact.phone
-                }))
-                } catch (e) {
-                    console.error(e)
-                    error.value = true
-                } finally {
-                  loading.value = false
+                const deletingItem = ref(null);
+                let idUpdate = ''
+
+
+                const baseURL =  "http://localhost:3000/contact"
+
+                function sanitazePhone (phone) {
+                    return phone.value.replace(/\D/g, "")
                 }
-    
-              }
-
-            onMounted(() => {
-                fetchContacts()
-            })
-
-            function showSuccessToast(msg, color) {
-                Toastify({
-                    text: msg,
-                    duration: 3000,
-                    gravity: "top",
-                    position: "right",
-                    backgroundColor: color,
-                }).showToast();
-                  }
-
-            function toggleVisibleModalCreate() {
-                showModalCreate.value = !showModalCreate.value;
-                if(!showModalCreate.value ) {
-                  contactName.value = ''
-                  contactPhone.value = ''
-                  nameError.value = ''
-                  phoneError.value = ''
+                
+                const fetchContacts = async () => {
+                    try {
+                    const res = await fetch(baseURL);
+                    const data = await res.json();
+                    console.log(data);
+                    
+                    contactsAPi.value = data.map(contact => ({
+                    id: contact.id,
+                    name: contact.name,
+                    phone: contact.phone
+                    }))
+                    } catch (e) {
+                        console.error(e)
+                        error.value = true
+                    } finally {
+                    loading.value = false
+                    }
+        
                 }
-              }
 
-            function toggleVisibleModalDelete() {
-                showModalDelete.value = !showModalDelete.value;
-              }
-            
-            function toggleVisibleModalUpdate() {
-                showModalUpdate.value = !showModalUpdate.value;
-                if(!showModalUpdate.value) {
+                onMounted(() => {
+                    fetchContacts()
+                })
+
+                function showSuccessToast(msg, color) {
+                    Toastify({
+                        text: msg,
+                        duration: 3000,
+                        gravity: "top",
+                        position: "right",
+                        backgroundColor: color,
+                    }).showToast();
+                    }
+
+                function toggleVisibleModalCreate() {
+                    showModalCreate.value = !showModalCreate.value;
+                    if(!showModalCreate.value ) {
                     contactName.value = ''
                     contactPhone.value = ''
                     nameError.value = ''
                     phoneError.value = ''
-                }
-              }
-                
-            const isFormValid = computed(() => {
-                const words = contactName.value
-                  .trim()
-                  .split(/\s+/)
-
-
-                const bigWords = words.filter(w => w.length >= 3);
-
-                if (bigWords.length < 2) {
-                  nameError.value =
-                    "O nome deve ter pelo menos duas palavras com no mínimo 3 letras.";
-                } else {
-                  nameError.value = "";
+                    }
                 }
 
-                const cleaned = (contactPhone.value || "").replace(/\D/g, "");
-                phoneError.value = cleaned.length !== 11
-                  ? "O telefone deve ter 11 dígitos."
-                  : "";
-
-                return nameError.value === "" && phoneError.value === "";
-              });  
-            
-            async function createContact() {
-                contactPhone.value = sanitazePhone(contactPhone);                
-                const res = await fetch(baseURL, {
-                  method: 'POST',
-                  headers: {
-                    'Content-Type': 'application/json'
-                  },
-                  body: JSON.stringify({
-                    name: contactName.value,
-                    phone: contactPhone.value
-                  })
-                })
-
-                  if (res.status === 201) {
-                    toggleVisibleModalCreate();
-                    await fetchContacts()
-                    showSuccessToast("Contato Cadastrado com Sucesso!", "green") 
-                  } else if (res.status === 409) {
-                   showSuccessToast("Contato já existente", "orange");  
-                   toggleVisibleModalCreate()
-                  } else {
-                   showSuccessToast("Um erro ocorreu", "red");  
-
-                  }
+                function toggleVisibleModalDelete() {
+                    showModalDelete.value = !showModalDelete.value;
+                }
                 
-              }
-            
-            function prepareDelete(item) {
-                toggleVisibleModalDelete();
-                deletingItem.value = item
-            }
+                function toggleVisibleModalUpdate() {
+                    showModalUpdate.value = !showModalUpdate.value;
+                    if(!showModalUpdate.value) {
+                        contactName.value = ''
+                        contactPhone.value = ''
+                        nameError.value = ''
+                        phoneError.value = ''
+                    }
+                }
+                    
+                const isFormValid = computed(() => {
+                    const words = contactName.value
+                    .trim()
+                    .split(/\s+/)
 
-            async function deleteContact () {
-                await fetch(`${baseURL}/${deletingItem.value.id}`, {method: 'DELETE'}).then(a => console.log(a));
-                toggleVisibleModalDelete()
-                await fetchContacts();
-                showSuccessToast("Contato deletado com sucesso!", "green");  
-            }
 
-            function prepareUpdate(item) {
-                console.log(item);
+                    const bigWords = words.filter(w => w.length >= 3);
+
+                    if (bigWords.length < 2) {
+                    nameError.value =
+                        "O nome deve ter pelo menos duas palavras com no mínimo 3 letras.";
+                    } else {
+                    nameError.value = "";
+                    }
+
+                    const cleaned = (contactPhone.value || "").replace(/\D/g, "");
+                    phoneError.value = cleaned.length !== 11
+                    ? "O telefone deve ter 11 dígitos."
+                    : "";
+
+                    return nameError.value === "" && phoneError.value === "";
+                });  
                 
-                toggleVisibleModalUpdate()
-                contactPhone.value = item.phone
-                contactName.value = item.name
-                idUpdate = item.id
-
-              }
-              
-            async function updateContact() {
-                contactPhone.value = sanitazePhone(contactPhone);
-
-                const res = await fetch(`${baseURL}/${idUpdate}`,{
-                  method: 'PATCH',
-                  headers: {
-                    'Content-Type': 'application/json'
-                  },
+                async function createContact() {
+                    contactPhone.value = sanitazePhone(contactPhone);                
+                    const res = await fetch(baseURL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
                     body: JSON.stringify({
-                    name: contactName.value,
-                    phone: contactPhone.value
-                  })
+                        name: contactName.value,
+                        phone: contactPhone.value
+                    })
+                    })
+
+                    if (res.status === 201) {
+                        toggleVisibleModalCreate();
+                        await fetchContacts()
+                        showSuccessToast("Contato Cadastrado com Sucesso!", "green") 
+                    } else if (res.status === 409) {
+                    showSuccessToast("Contato já existente", "orange");  
+                    toggleVisibleModalCreate()
+                    } else {
+                    showSuccessToast("Um erro ocorreu", "red");  
+
+                    }
+                    
                 }
-                );
-                  if (res.status === 200) {
-                    toggleVisibleModalUpdate();
-                    await fetchContacts()
-                    showSuccessToast("Contato atualizado com Sucesso!", "green") 
-                  } else if (res.status === 409) {
-                   showSuccessToast("Contato já existente", "orange");  
-                   toggleVisibleModalUpdate()
-                  } else {
-                   showSuccessToast("Um erro ocorreu", "red");  
-
-                  }
                 
-              }
-            
-            function maskPhone(el) {
-                new Cleave(el.inputEl, {
-                  delimiters: ['(', ') ', '-'],
-                  blocks: [0, 2, 5, 4],
-                  numericOnly: true
-                })
-              }
+                function prepareDelete(item) {
+                    toggleVisibleModalDelete();
+                    deletingItem.value = item
+                }
 
-            
-            watch(showModalCreate, async o => o && (await nextTick(), maskPhone(inputPhone.value)))
-            watch(showModalUpdate, async o => o && (await nextTick(), maskPhone(inputPhoneUpdate.value)))
+                async function deleteContact () {
+                    await fetch(`${baseURL}/${deletingItem.value.id}`, {method: 'DELETE'}).then(a => console.log(a));
+                    toggleVisibleModalDelete()
+                    await fetchContacts();
+                    showSuccessToast("Contato deletado com sucesso!", "green");  
+                }
 
-            return {
-                toggleVisibleModalCreate, showModalCreate, contactName,
-                contactPhone, nameError, phoneError, isFormValid,
-                inputPhone, deletingItem, showModalDelete,
-                toggleVisibleModalDelete, contactsAPi, loading, error,
-                prepareUpdate, prepareDelete
+                function prepareUpdate(item) {
+                    console.log(item);
+                    
+                    toggleVisibleModalUpdate()
+                    contactPhone.value = item.phone
+                    contactName.value = item.name
+                    idUpdate = item.id
+
+                }
                 
+                async function updateContact() {
+                    contactPhone.value = sanitazePhone(contactPhone);
+
+                    const res = await fetch(`${baseURL}/${idUpdate}`,{
+                    method: 'PATCH',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                        body: JSON.stringify({
+                        name: contactName.value,
+                        phone: contactPhone.value
+                    })
+                    }
+                    );
+                    if (res.status === 200) {
+                        toggleVisibleModalUpdate();
+                        await fetchContacts()
+                        showSuccessToast("Contato atualizado com Sucesso!", "green") 
+                    } else if (res.status === 409) {
+                    showSuccessToast("Contato já existente", "orange");  
+                    toggleVisibleModalUpdate()
+                    } else {
+                    showSuccessToast("Um erro ocorreu", "red");  
+
+                    }
+                    
+                }
+                
+                function maskPhone(el) {
+                    new Cleave(el.inputEl, {
+                    delimiters: ['(', ') ', '-'],
+                    blocks: [0, 2, 5, 4],
+                    numericOnly: true
+                    })
+                }
+
+                
+                watch(showModalCreate, async o => o && (await nextTick(), maskPhone(inputPhone.value)))
+                watch(showModalUpdate, async o => o && (await nextTick(), maskPhone(inputPhoneUpdate.value)))
+
+                return {
+                showModalCreate, toggleVisibleModalCreate, toggleVisibleModalDelete,
+                showModalDelete,
+                inputPhone, contactName, 
+                nameError, phoneError, 
+                prepareDelete, deletingItem, 
+                showModalUpdate, prepareUpdate, toggleVisibleModalUpdate,
+                contactPhone, inputPhoneUpdate,
+                isFormValid, contactsAPi,
+                loading, error, deleteContact,
+                updateContact, createContact
+                    
+                }
             }
-        }
 
-      });
+        });
 
-      app.component("BaseInput", {
-            props: {
-              inputId: String,
-              req: String,
-              max: String,
-              modelValue: String,
-              label: String,
-              placeholder: String,
-              error: String,
-              type: { type: String, default: "text" },
-            },
-            emits: ["update:modelValue", "input"],
-            setup(props, { emit, expose }) {
-              const inputEl = ref(null);
+        app.component("BaseInput", {
+                props: {
+                inputId: String,
+                req: String,
+                max: String,
+                modelValue: String,
+                label: String,
+                placeholder: String,
+                error: String,
+                type: { type: String, default: "text" },
+                },
+                emits: ["update:modelValue", "input"],
+                setup(props, { emit, expose }) {
+                const inputEl = ref(null);
 
-              function handleInput(event) {
-                let value = event.target.value;
+                function handleInput(event) {
+                    let value = event.target.value;
 
-                if (props.inputId === "name") {
-                  value = value.replace(/[^A-Za-zÀ-ÖØ-öø-ÿ\s'-]/g, "");
-                  event.target.value = value; 
+                    if (props.inputId === "name") {
+                    value = value.replace(/[^A-Za-zÀ-ÖØ-öø-ÿ\s'-]/g, "");
+                    event.target.value = value; 
+                    }
+
+                    emit("update:modelValue", value);
+                    emit("input", value);
                 }
 
-                emit("update:modelValue", value);
-                emit("input", value);
-              }
-
-              expose({ inputEl });
-              return { inputEl, handleInput };
+                expose({ inputEl });
+                return { inputEl, handleInput };
+                },
+                template: `
+                <div class="mb-4">
+                    <label :for="inputId" class="block mb-1 font-medium text-gray-700">{{ label }}</label>
+                    <input
+                    ref="inputEl"
+                    :id="inputId"
+                    :type="type"
+                    class="border p-2 w-full rounded focus:outline-none focus:ring-1 focus:ring-blue-700 focus:border-blue-700"
+                    :placeholder="placeholder"
+                    :required="req"
+                    :value="modelValue"
+                    :maxlength="max"
+                    @input="handleInput"
+                    />
+                    <p v-if="error" class="text-orange-700 text-sm mt-1">{{ error }}</p>
+                </div>
+                `,
+            });
+        app.component("BaseButton", {
+            props: {
+                type: { type: String, default: "submit" },
+                disabledClasses: { type: String, default: "" }, 
+                },
+            template: `
+                <button
+                    :type="type"
+                    v-bind="$attrs"
+                    :class="[ $attrs.class, $attrs.disabled ? disabledClasses : '' ]"
+                >
+                    <slot />
+                </button>
+                `,
+            });
+        app.component("ContactTable", {
+            props: {
+            contacts: { type: Array, default: () => [] },
+            loading: Boolean,
+            error: Boolean,
+            },
+            emits: ["edit", "delete"],
+            setup(props, { emit }) {
+            function formatPhone(phone) {
+                const cleaned = phone.replace(/\D/g, "");
+                const match = cleaned.match(/^(\d{2})(\d{5})(\d{4})$/);
+                return match ? `(${match[1]}) ${match[2]}-${match[3]}` : phone;
+            }
+            return { emit, formatPhone };
             },
             template: `
-              <div class="mb-4">
-                <label :for="inputId" class="block mb-1 font-medium text-gray-700">{{ label }}</label>
-                <input
-                  ref="inputEl"
-                  :id="inputId"
-                  :type="type"
-                  class="border p-2 w-full rounded focus:outline-none focus:ring-1 focus:ring-blue-700 focus:border-blue-700"
-                  :placeholder="placeholder"
-                  :required="req"
-                  :value="modelValue"
-                  :maxlength="max"
-                  @input="handleInput"
-                />
-                <p v-if="error" class="text-orange-700 text-sm mt-1">{{ error }}</p>
-              </div>
-            `,
-          });
-      app.component("BaseButton", {
-        props: {
-              type: { type: String, default: "submit" },
-              disabledClasses: { type: String, default: "" }, 
-            },
-        template: `
-              <button
-                :type="type"
-                v-bind="$attrs"
-                :class="[ $attrs.class, $attrs.disabled ? disabledClasses : '' ]"
-              >
-                <slot />
-              </button>
-            `,
-          });
-      app.component("ContactTable", {
-        props: {
-          contacts: { type: Array, default: () => [] },
-          loading: Boolean,
-          error: Boolean,
-        },
-        emits: ["edit", "delete"],
-        setup(props, { emit }) {
-          function formatPhone(phone) {
-            const cleaned = phone.replace(/\D/g, "");
-            const match = cleaned.match(/^(\d{2})(\d{5})(\d{4})$/);
-            return match ? `(${match[1]}) ${match[2]}-${match[3]}` : phone;
-          }
-          return { emit, formatPhone };
-        },
-        template: `
-              <div class="rounded-lg overflow-hidden border border-gray-300">
-                <table class="table-auto min-w-full">
-                  <thead class="bg-gray-200">
-                    <tr>
-                      <th class="text-start p-2">ID</th>
-                      <th class="text-start p-2">Nome</th>
-                      <th class="text-start p-2">Telefone</th>
-                      <th class="text-start p-2">Ações</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr v-if="loading">
-                      <td colspan="4" class="p-4 text-center text-gray-500 italic">
-                        Carregando contatos...
-                      </td>
-                    </tr>
+                <div class="rounded-lg overflow-hidden border border-gray-300">
+                    <table class="table-auto min-w-full">
+                    <thead class="bg-gray-200">
+                        <tr>
+                        <th class="text-start p-2">ID</th>
+                        <th class="text-start p-2">Nome</th>
+                        <th class="text-start p-2">Telefone</th>
+                        <th class="text-start p-2">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr v-if="loading">
+                        <td colspan="4" class="p-4 text-center text-gray-500 italic">
+                            Carregando contatos...
+                        </td>
+                        </tr>
 
-                    <tr v-else-if="error">
-                      <td colspan="4" class="p-4 text-center text-red-500 font-medium bg-red-50">
-                        Ocorreu um erro ao carregar os contatos
-                      </td>
-                    </tr>
+                        <tr v-else-if="error">
+                        <td colspan="4" class="p-4 text-center text-red-500 font-medium bg-red-50">
+                            Ocorreu um erro ao carregar os contatos
+                        </td>
+                        </tr>
 
-                    <tr v-else-if="contacts.length === 0">
-                      <td colspan="4" class="p-4 text-center text-gray-400 italic">
-                        Nenhum contato cadastrado.
-                      </td>
-                    </tr>
+                        <tr v-else-if="contacts.length === 0">
+                        <td colspan="4" class="p-4 text-center text-gray-400 italic">
+                            Nenhum contato cadastrado.
+                        </td>
+                        </tr>
 
-                    <tr v-else v-for="item in contacts" :key="item.id"
-                    :class="{ 'bg-blue-100': item.phone.startsWith('11') }"
-                    >
-                      <td class="text-start p-3 text-gray-500">{{ item.id.slice(0,4) }}</td>
-                      <td class="text-start p-3 font-medium">{{ item.name }}</td>
-                      <td class="text-start p-3 text-gray-500">{{ formatPhone(item.phone) }}</td>
-                      <td class="p-3 flex gap-2">
-                        <base-button color="none" @click="emit('edit', item)">
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            viewBox="0 0 24 24"
-                            fill="currentColor"
-                            class="size-6 text-orange-500 hover:text-orange-700 duration-200 ease-in-out hover:scale-110"
-                          >
-                            <path
-                              d="M21.731 2.269a2.625 2.625 0 0 0-3.712 0l-1.157 1.157 3.712 3.712 1.157-1.157a2.625 2.625 0 0 0 0-3.712ZM19.513 8.199l-3.712-3.712-8.4 8.4a5.25 5.25 0 0 0-1.32 2.214l-.8 2.685a.75.75 0 0 0 .933.933l2.685-.8a5.25 5.25 0 0 0 2.214-1.32l8.4-8.4Z"
-                            />
-                            <path
-                              d="M5.25 5.25a3 3 0 0 0-3 3v10.5a3 3 0 0 0 3 3h10.5a3 3 0 0 0 3-3V13.5a.75.75 0 0 0-1.5 0v5.25a1.5 1.5 0 0 1-1.5 1.5H5.25a1.5 1.5 0 0 1-1.5-1.5V8.25a1.5 1.5 0 0 1 1.5-1.5h5.25a.75.75 0 0 0 0-1.5H5.25Z"
-                            />
-                          </svg>
-                        </base-button>
+                        <tr v-else v-for="item in contacts" :key="item.id"
+                        :class="{ 'bg-blue-100': item.phone.startsWith('11') }"
+                        >
+                        <td class="text-start p-3 text-gray-500">{{ item.id.slice(0,4) }}</td>
+                        <td class="text-start p-3 font-medium">{{ item.name }}</td>
+                        <td class="text-start p-3 text-gray-500">{{ formatPhone(item.phone) }}</td>
+                        <td class="p-3 flex gap-2">
+                            <base-button color="none" @click="emit('edit', item)">
+                            <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                viewBox="0 0 24 24"
+                                fill="currentColor"
+                                class="size-6 text-orange-500 hover:text-orange-700 duration-200 ease-in-out hover:scale-110"
+                            >
+                                <path
+                                d="M21.731 2.269a2.625 2.625 0 0 0-3.712 0l-1.157 1.157 3.712 3.712 1.157-1.157a2.625 2.625 0 0 0 0-3.712ZM19.513 8.199l-3.712-3.712-8.4 8.4a5.25 5.25 0 0 0-1.32 2.214l-.8 2.685a.75.75 0 0 0 .933.933l2.685-.8a5.25 5.25 0 0 0 2.214-1.32l8.4-8.4Z"
+                                />
+                                <path
+                                d="M5.25 5.25a3 3 0 0 0-3 3v10.5a3 3 0 0 0 3 3h10.5a3 3 0 0 0 3-3V13.5a.75.75 0 0 0-1.5 0v5.25a1.5 1.5 0 0 1-1.5 1.5H5.25a1.5 1.5 0 0 1-1.5-1.5V8.25a1.5 1.5 0 0 1 1.5-1.5h5.25a.75.75 0 0 0 0-1.5H5.25Z"
+                                />
+                            </svg>
+                            </base-button>
 
-                        <base-button color="none" @click="emit('delete', item)">
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            viewBox="0 0 24 24"
-                            fill="currentColor"
-                            class="size-6 hover:cursor-pointer text-red-500 hover:text-red-700 duration-200 ease-in-out hover:scale-110"
-                          >
-                            <path
-                              d="M3.375 3C2.339 3 1.5 3.84 1.5 4.875v.75c0 1.036.84 1.875 1.875 1.875h17.25c1.035 0 1.875-.84 1.875-1.875v-.75C22.5 3.839 21.66 3 20.625 3H3.375Z"
-                            />
-                            <path
-                              fill-rule="evenodd"
-                              d="m3.087 9 .54 9.176A3 3 0 0 0 6.62 21h10.757a3 3 0 0 0 2.995-2.824L20.913 9H3.087Zm6.133 2.845a.75.75 0 0 1 1.06 0l1.72 1.72 1.72-1.72a.75.75 0 1 1 1.06 1.06l-1.72 1.72 1.72 1.72a.75.75 0 1 1-1.06 1.06L12 15.685l-1.72 1.72a.75.75 0 1 1-1.06-1.06l1.72-1.72-1.72-1.72a.75.75 0 0 1 0-1.06Z"
-                              clip-rule="evenodd"
-                            />
-                          </svg>
-                        </base-button>
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-            `,
-      });
-      app.mount("#app");
-    </script>
-  </body>
-</html>
+                            <base-button color="none" @click="emit('delete', item)">
+                            <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                viewBox="0 0 24 24"
+                                fill="currentColor"
+                                class="size-6 hover:cursor-pointer text-red-500 hover:text-red-700 duration-200 ease-in-out hover:scale-110"
+                            >
+                                <path
+                                d="M3.375 3C2.339 3 1.5 3.84 1.5 4.875v.75c0 1.036.84 1.875 1.875 1.875h17.25c1.035 0 1.875-.84 1.875-1.875v-.75C22.5 3.839 21.66 3 20.625 3H3.375Z"
+                                />
+                                <path
+                                fill-rule="evenodd"
+                                d="m3.087 9 .54 9.176A3 3 0 0 0 6.62 21h10.757a3 3 0 0 0 2.995-2.824L20.913 9H3.087Zm6.133 2.845a.75.75 0 0 1 1.06 0l1.72 1.72 1.72-1.72a.75.75 0 1 1 1.06 1.06l-1.72 1.72 1.72 1.72a.75.75 0 1 1-1.06 1.06L12 15.685l-1.72 1.72a.75.75 0 1 1-1.06-1.06l1.72-1.72-1.72-1.72a.75.75 0 0 1 0-1.06Z"
+                                clip-rule="evenodd"
+                                />
+                            </svg>
+                            </base-button>
+                        </td>
+                        </tr>
+                    </tbody>
+                    </table>
+                </div>
+                `,
+        });
+        app.mount("#app");
+        </script>
+    </body>
+    </html>
