@@ -46,6 +46,7 @@
                 <h1 class="font-title font-semibold text-2xl">Lista de Contatos</h1>
               </div>
             </header>
+
             <section class="flex flex-col px-8 py-5 mt-5 rounded-md gap-4 bg-gray-100/50 shadow-xs">
             <base-button
             class="bg-blue-600 text-white rounded-md py-1 px-2 self-end hover:cursor-pointer hover:bg-blue-800"
@@ -64,15 +65,148 @@
                />
             </section>
 
+            <div
+              v-if="showModalCreate"
+              class="fixed inset-0 bg-black/50 flex justify-center items-center opacity-0"
+              :class="{ 'opacity-100 transition-opacity duration-200': showModalCreate }"
+            >
+            <form class="bg-white rounded-lg p-6 w-100 relative" @submit.prevent="createContact">
+                <h2 class="text-xl font-semibold text-black mb-4">Novo Contato</h2>
+                <base-input
+                  input-id="name"
+                  label="Nome"
+                  placeholder="Digite seu nome"
+                  v-model="contactName"
+                  req="required"
+                  :error="nameError"
+                >
+                </base-input>
+
+                <base-input
+                  input-id="phone"
+                  ref="inputPhone"
+                  label="Telefone"
+                  placeholder="(85) 98891-9231"
+                  :error="phoneError"
+                  v-model="contactPhone"
+                  type="tel"
+                  max="15"
+                  req="required"
+                >
+                </base-input>
+
+                <div class="flex justify-end gap-2 mt-4">
+                  <base-button class="bg-gray-300 px-4 py-2 rounded hover:bg-gray-400" @click="toggleVisibleModalCreate">Cancelar</base-button>
+
+                  <base-button
+                    :disabled="!isFormValid"
+                    class="bg-blue-700 text-white hover:bg-blue-800 px-4 py-2 rounded"
+                    disabled-classes="bg-gray-400 text-gray-200 cursor-not-allowed hover:bg-gray-400"
+                  >
+                    Salvar
+                  </base-button>
+
+                </div>
+            </form>
+            </div>
+
+
         </div>
     </div>
 
     <script type="module">
-      import { createApp } from "vue";
+      import { createApp, ref, computed } from "vue";
       const app = createApp({
-        setup() {},
+        setup() {
+            const showModalCreate = ref(false);
+            const inputPhone = ref(null);
+
+            const contactName = ref('');
+            const contactPhone = ref('');
+                            
+            const nameError = ref("");
+            const phoneError = ref("");
+
+            function showSuccessToast(msg, color) {
+                Toastify({
+                    text: msg,
+                    duration: 3000,
+                    gravity: "top",
+                    position: "right",
+                    backgroundColor: color,
+                }).showToast();
+                  }
+
+            function toggleVisibleModalCreate() {
+                showModalCreate.value = !showModalCreate.value;
+                if(!showModalCreate.value ) {
+                  contactName.value = ''
+                  contactPhone.value = ''
+                  nameError.value = ''
+                  phoneError.value = ''
+                }
+              }
+
+            const isFormValid = computed(() => {
+                const words = contactName.value
+                  .trim()
+                  .split(/\s+/)
+
+
+                const bigWords = words.filter(w => w.length >= 3);
+
+                if (bigWords.length < 2) {
+                  nameError.value =
+                    "O nome deve ter pelo menos duas palavras com no mínimo 3 letras.";
+                } else {
+                  nameError.value = "";
+                }
+
+                const cleaned = (contactPhone.value || "").replace(/\D/g, "");
+                phoneError.value = cleaned.length !== 11
+                  ? "O telefone deve ter 11 dígitos."
+                  : "";
+
+                return nameError.value === "" && phoneError.value === "";
+              });  
+            
+            async function createContact() {
+                contactPhone.value = sanitazePhone(contactPhone);                
+                const res = await fetch(baseURL, {
+                  method: 'POST',
+                  headers: {
+                    'Content-Type': 'application/json'
+                  },
+                  body: JSON.stringify({
+                    name: contactName.value,
+                    phone: contactPhone.value
+                  })
+                })
+
+                  if (res.status === 201) {
+                    toggleVisibleModalCreate();
+                    await fetchContacts()
+                    showSuccessToast("Contato Cadastrado com Sucesso!", "green") 
+                  } else if (res.status === 409) {
+                   showSuccessToast("Contato já existente", "orange");  
+                   toggleVisibleModalCreate()
+                  } else {
+                   showSuccessToast("Um erro ocorreu", "red");  
+
+                  }
+                
+              }
+            
+            return {
+                toggleVisibleModalCreate, showModalCreate, contactName,
+                contactPhone, nameError, phoneError, isFormValid,
+                inputPhone
+                
+            }
+        }
+
       });
-      
+
       app.component("BaseInput", {
             props: {
               inputId: String,
