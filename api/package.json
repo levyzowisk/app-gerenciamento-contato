@@ -7,7 +7,8 @@
     "watch": "tsc -w",
     "dev": "concurrently \"nodemon ./dist/server.js\" \"npx tsc -w\"",
     "prisma:deploy": "prisma migrate deploy",
-    "start":"npm run prisma:deploy && node ./dist/server.js"
+    "prisma:generate": "prisma generate",
+    "start":"npm run prisma:generate && npm run prisma:deploy && node ./dist/server.js"
   },
   "keywords": [],
   "author": "",

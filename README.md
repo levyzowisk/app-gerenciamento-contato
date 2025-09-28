@@ -64,9 +64,8 @@ Para rodar o backend localmente, siga os passos abaixo:
    ```
 
 3. **Configure as variáveis de ambiente:**
-   Crie um arquivo `.env` na raiz do projeto com as configurações do banco de dados e a porta que o servidor irá rodar. Exemplo:
+   Crie um arquivo `.env` na raiz do projeto com as configurações do banco de dados. Exemplo:
    ```
-   SERVER_PORT=0000
    DATABASE_URL=mysql://usuario:senha@localhost:3306/nome_do_banco
    ```
 
