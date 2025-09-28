@@ -218,7 +218,6 @@
                     try {
                     const res = await fetch(baseURL);
                     const data = await res.json();
-                    console.log(data);
                     
                     contactsAPi.value = data.map(contact => ({
                     id: contact.id,
@@ -328,14 +327,13 @@
                 }
 
                 async function deleteContact () {
-                    await fetch(`${baseURL}/${deletingItem.value.id}`, {method: 'DELETE'}).then(a => console.log(a));
+                    await fetch(`${baseURL}/${deletingItem.value.id}`, {method: 'DELETE'})
                     toggleVisibleModalDelete()
                     await fetchContacts();
                     showSuccessToast("Contato deletado com sucesso!", "green");  
                 }
 
                 function prepareUpdate(item) {
-                    console.log(item);
                     
                     toggleVisibleModalUpdate()
                     contactPhone.value = item.phone
