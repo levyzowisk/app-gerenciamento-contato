@@ -5,7 +5,7 @@ import cors from 'cors';
 import handleError from "./middleware/error.js";
 dotenv.config();
 const app = express();
-const port = process.env.SERVER_PORT || 3100;
+const port = 3000;
 app.use(express.json());
 app.use(cors());
 app.use("/contact", route);
